@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario 2027 AO - Consulta de Actividades</title>
+  <style>
+    /* ========================================== */
+    /* VARIABLES DE TEMA (POR DEFAULT: MODO OSCURO) */
+    /* ========================================== */
+    :root {
+      --bg-dark: #0f0919;
+      --card-bg: #1c132b;
+      --input-bg: #120b20;
+      --border-color: #33214b;
+      --primary: #6b21a8;
+      --primary-hover: #7e22ce;
+      --accent: #00a878;
+      --accent-hover: #02c38e;
+      --text: #ffffff;
+      --text-muted: #a78bfa;
+      --month-header-bg: #3b0764;
+      --month-header-border: #6b21a8;
+      --date-box-bg: #2e1065;
+      --date-box-border: #7e22ce;
+      --date-top-text: #d8b4fe;
+      --danger: #dc2626;
+      --whatsapp: #25d366;
+      --calendar-google: #4285f4;
+      --calendar-apple: #333333;
+      --footer-bg: #120b20;
+      --footer-text: #a78bfa;
+    }
+
+    /* ========================================== */
+    /* TEMA CLARO CLEOPATRA (BLANCO, GRIS Y VERDE) */
+    /* ========================================== */
+    body.theme-light {
+      --bg-dark: #f1f5f9;               
+      --card-bg: #ffffff;               
+      --input-bg: #f8fafc;              
+      --border-color: #cbd5e1;          
+      --primary: #0f766e;               
+      --primary-hover: #115e59;
+      --accent: #0d9488;                
+      --accent-hover: #14b8a6;
+      --text: #0f172a;                  
+      --text-muted: #0d9488;            
+      --month-header-bg: #0f766e;       
+      --month-header-border: #0d9488;
+      --date-box-bg: #ccfbf1;           
+      --date-box-border: #0d9488;
+      --date-top-text: #0f766e;
+      --footer-bg: #e2e8f0;
+      --footer-text: #0f766e;
+      --calendar-apple: #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background-color: var(--bg-dark); 
+      color: var(--text); 
+      padding: 20px 20px 0 20px; 
+      line-height: 1.4; 
+      transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-wrapper { flex: 1; }
+
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    header h1 { font-size: 1.6rem; color: var(--accent); font-weight: 700; }
+    
+    .top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn { padding: 9px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-accent { background: var(--accent); color: #ffffff; font-weight: 700; }
+    .btn-pdf { background: #e11d48; color: #ffffff; font-weight: 700; }
+    .btn-pdf:hover { background: #be123c; }
+    .btn-theme-toggle { background: var(--input-bg); color: var(--text); border: 1px solid var(--border-color); }
+    .btn-theme-toggle:hover { background: var(--border-color); }
+    .btn-secondary { background: var(--border-color); color: var(--text); }
+    .btn-whatsapp { background: var(--whatsapp); color: #000000; font-weight: 700; }
+    .btn-gcal { background: var(--calendar-google); color: #ffffff; font-weight: 600; }
+    .btn-ical { background: var(--calendar-apple); color: #ffffff; font-weight: 600; }
+
+    /* PANEL DE ESTADÍSTICAS */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-card .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; margin-bottom: 4px; }
+    .stat-card .stat-value { font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+    .stat-card .stat-sub { font-size: 0.72rem; color: var(--text); opacity: 0.8; margin-top: 2px; }
+
+    /* BARRA DE FILTROS */
+    .filter-bar { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .filter-group label { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; font-weight: bold; }
+    select, input[type="text"] { width: 100%; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text); font-size: 0.88rem; }
+
+    /* RED DE MESES */
+    .poster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 30px; }
+    .month-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: transform 0.2s; }
+    .month-card:hover { transform: translateY(-2px); }
+    .month-header { background: var(--month-header-bg); color: #fff; font-weight: 800; text-align: center; padding: 8px; font-size: 1rem; letter-spacing: 1px; border-bottom: 2px solid var(--month-header-border); text-transform: uppercase; }
+
+    /* ITEM DE EVENTO EN PORTADA PRINCIPAL */
+    .event-item { 
+      padding: 12px; 
+      border-bottom: 1px solid var(--border-color); 
+      cursor: pointer; 
+      transition: background 0.2s; 
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px; 
+      align-items: center; 
+    }
+    .event-item:hover { background: var(--input-bg); }
+    .event-item:last-child { border-bottom: none; }
+
+    /* CAJA DE FECHA CON AUTOAJUSTE */
+    .date-split-box { background: var(--date-box-bg); border: 1px solid var(--date-box-border); border-radius: 6px; min-width: 65px; max-width: 85px; height: 50px; text-align: center; display: flex; flex-direction: column; justify-content: center; padding: 2px; overflow: hidden; }
+    .date-split-box .d-top { font-size: 0.58rem; color: var(--date-top-text); font-weight: bold; text-transform: uppercase; border-bottom: 1px solid var(--date-box-border); padding-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .date-split-box .d-bottom { font-size: clamp(0.60rem, 2.2vw, 0.90rem); color: var(--text); font-weight: 800; line-height: 1.1; word-break: break-word; }
+
+    .event-info { display: flex; flex-direction: column; gap: 2px; }
+    .event-title { font-weight: 700; font-size: 0.88rem; color: var(--text); }
+    .event-desc-text { font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
+    .event-location { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+
+    .event-depts-col { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; justify-content: center; max-width: 110px; }
+    .mini-dept-chip { font-size: 0.62rem; padding: 2px 6px; border-radius: 10px; background: var(--month-header-bg); color: #ffffff; border: 1px solid var(--month-header-border); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+    /* MODALES */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal-overlay.active { display: flex; }
+    
+    .modal-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 850px; max-height: 90vh; overflow-y: auto; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); position: relative; color: var(--text); }
+    .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
+
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px 0; }
+    @media (max-width: 600px) { .gallery-grid { grid-template-columns: 1fr; } }
+
+    .gallery-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; text-align: center; }
+    .gallery-label { font-size: 0.7rem; color: var(--text-muted); font-weight: bold; margin-bottom: 6px; text-transform: uppercase; }
+    
+    .img-preview-banner { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; cursor: pointer; }
+    .img-preview-poster { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 4px; cursor: pointer; }
+    .img-preview-profile { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; cursor: pointer; }
+
+    .lightbox-img-full { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; margin-bottom: 15px; }
+    .lightbox-actions { display: flex; gap: 10px; justify-content: center; }
+    .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(13, 148, 136, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+
+    /* SECCIÓN DE BOTONES DE CALENDARIOS EN DETALLE */
+    .add-calendar-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+    .add-calendar-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .calendar-btns-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* PIE DE PÁGINA */
+    footer {
+      background: var(--footer-bg);
+      border-top: 1px solid var(--border-color);
+      color: var(--footer-text);
+      text-align: center;
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: auto;
+      margin-left: -20px;
+      margin-right: -20px;
+    }
+
+    /* ESTILOS EXCLUSIVOS DE IMPRESIÓN / REPORTES PDF */
+    @media print {
+      body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+      .main-wrapper, header, .stats-bar, .filter-bar, footer, .modal-overlay, .top-actions { display: none !important; }
+      
+      #printReportArea {
+        display: block !important;
+        width: 100%;
+        max-width: 215mm;
+        margin: 0 auto;
+        padding: 15mm;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .pdf-header { border-bottom: 3px solid #0f766e; padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
+      .pdf-header h1 { font-size: 18pt; color: #0f766e; margin-bottom: 4px; text-transform: uppercase; }
+      .pdf-header h2 { font-size: 13pt; color: #334155; margin-bottom: 8px; font-weight: 600; }
+      .pdf-meta { display: flex; justify-content: space-between; font-size: 9pt; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 4px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+
+      .pdf-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      .pdf-table th { background-color: #0f766e; color: #ffffff; text-align: left; padding: 6pt 8pt; font-size: 9pt; text-transform: uppercase; }
+      .pdf-table td { padding: 6pt 8pt; border-bottom: 1px solid #cbd5e1; font-size: 8.5pt; vertical-align: top; }
+      .pdf-table tr:nth-child(even) { background-color: #f8fafc; }
+
+      .pdf-date-badge { font-weight: bold; color: #0f766e; white-space: nowrap; }
+      .pdf-footer { text-align: center; font-size: 8pt; color: #94a3b8; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+    }
+
+    #printReportArea { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+  <header>
+    <div>
+      <h1>Calendario de Actividades 2027</h1>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Asociación de Oaxaca - Portal de Consulta</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-theme-toggle" id="btnToggleTheme" onclick="alternarTemaVisual()">☀️ Modo Claro Cleopatra</button>
+      <button class="btn btn-pdf" onclick="exportarReportePDF()">📄 Exportar Reporte PDF (Carta)</button>
+      <span class="status-badge" id="firebaseStatus">🟢 Sincronizado</span>
+    </div>
+  </header>
+
+  <!-- PANEL DE ESTADÍSTICAS ORGANIZACIONALES -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total de Eventos</div>
+      <div class="stat-value" id="statTotalEv">0</div>
+      <div class="stat-sub">Registrados en agenda 2027</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Eventos Filtrados</div>
+      <div class="stat-value" id="statFilteredEv">0</div>
+      <div class="stat-sub" id="statFilterContext">Todos los Departamentos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Próximo Evento Destacado</div>
+      <div class="stat-value" style="font-size: 0.95rem; font-weight: 700;" id="statNextEvTitle">-</div>
+      <div class="stat-sub" id="statNextEvSub">Sin fecha próxima</div>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>🔎 Buscar Actividad:</label>
+      <input type="text" id="searchInput" placeholder="Ej. Campaña, Taller, Concilio..." oninput="filtrarEventos()">
+    </div>
+    <div class="filter-group">
+      <label>🏢 Filtrar por Departamento:</label>
+      <select id="filterDept" onchange="filtrarEventos()">
+        <option value="">Todos los Departamentos</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>📅 Filtrar por Trimestre:</label>
+      <select id="filterQuarter" onchange="filtrarEventos()">
+        <option value="">Todo el Año (12 Meses)</option>
+        <option value="Q1">1er Trimestre (Ene - Mar)</option>
+        <option value="Q2">2do Trimestre (Abr - Jun)</option>
+        <option value="Q3">3er Trimestre (Jul - Sep)</option>
+        <option value="Q4">4to Trimestre (Oct - Dic)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- PÓSTER ANUAL (Cajas de mes dinámicas) -->
+  <div class="poster-grid" id="posterContainer">
+    <!-- Carga dinámica -->
+  </div>
+</div>
+
+<!-- ÁREA OCULTA PARA IMPRESIÓN/EXPORTACIÓN A PDF -->
+<div id="printReportArea"></div>
+
+<!-- PIE DE PÁGINA -->
+<footer>
+  Creado por Asociación de Oaxaca
+</footer>
+
+<!-- MODAL 1: VER DETALLE DEL EVENTO -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-card">
+    <button class="modal-close" onclick="cerrarModales()">✕</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- MODAL 2: LIGHTBOX VISOR -->
+<div class="modal-overlay" id="modalLightbox">
+  <div class="modal-card" style="text-align: center; max-width: 650px;">
+    <button class="modal-close" onclick="cerrarLightbox()">✕</button>
+    <h3 id="lightboxTitle" style="color: var(--accent); margin-bottom: 12px; font-size: 1rem;">Vista Previa Ampliada</h3>
+    <img id="lightboxImg" src="" class="lightbox-img-full">
+    <div class="lightbox-actions">
+      <a id="btnDownloadImg" href="" download="imagen_evento.jpg" target="_blank" class="btn btn-accent">⬇️ Descargar Imagen</a>
+      <button class="btn btn-secondary" onclick="copiarEnlaceImagen()">📋 Copiar Enlace</button>
+    </div>
+  </div>
+</div>
+
+<!-- JAVASCRIPT Y FIREBASE (SOLO LECTURA) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCgdPWdJLHbmu8Yy0rTlaXI11EaOaJE5CE",
+    authDomain: "calenoaxaca27.firebaseapp.com",
+    databaseURL: "https://calenoaxaca27-default-rtdb.firebaseio.com",
+    projectId: "calenoaxaca27",
+    storageBucket: "calenoaxaca27.firebasestorage.app",
+    messagingSenderId: "505386229919",
+    appId: "1:505386229919:web:1b3f01cfe3f56c4535c2aa"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const eventosRef = ref(db, 'eventos2027');
+
+  const MESES = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+  const MESES_NUM = { "ENERO":"01", "FEBRERO":"02", "MARZO":"03", "ABRIL":"04", "MAYO":"05", "JUNIO":"06", "JULIO":"07", "AGOSTO":"08", "SEPTIEMBRE":"09", "OCTUBRE":"10", "NOVIEMBRE":"11", "DICIEMBRE":"12" };
+  const TRIMESTRES = {
+    "Q1": ["ENERO", "FEBRERO", "MARZO"],
+    "Q2": ["ABRIL", "MAYO", "JUNIO"],
+    "Q3": ["JULIO", "AGOSTO", "SEPTIEMBRE"],
+    "Q4": ["OCTUBRE", "NOVIEMBRE", "DICIEMBRE"]
+  };
+
+  let departamentosLista = ["Mayordomía", "MIA", "Escuela Sabática", "Secretaría", "Salud", "Ministerio Personal", "Jóvenes", "Educación", "Retención"];
+  
+  let eventosDataMap = {};
+  let ultimosEventosFiltrados = [];
+  let activeImageTargetUrl = "";
+
+  function convertirUrlDrive(url) {
+    if (!url) return "";
+    url = url.trim();
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://lh3.googleusercontent.com/d/${match[1]}`;
+      }
+    }
+    return url;
+  }
+
+  window.alternarTemaVisual = function() {
+    const isLight = document.body.classList.toggle('theme-light');
+    const btn = document.getElementById('btnToggleTheme');
+    if (isLight) {
+      btn.innerText = '🌙 Modo Oscuro';
+    } else {
+      btn.innerText = '☀️ Modo Claro Cleopatra';
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    poblarFiltroDeptos();
+    escucharRealtimeDB();
+  });
+
+  function poblarFiltroDeptos() {
+    const selectFilter = document.getElementById('filterDept');
+    selectFilter.innerHTML = '<option value="">Todos los Departamentos</option>';
+    departamentosLista.forEach(d => {
+      selectFilter.innerHTML += `<option value="${d}">${d}</option>`;
+    });
+  }
+
+  function escucharRealtimeDB() {
+    onValue(eventosRef, (snapshot) => {
+      eventosDataMap = snapshot.val() || {};
+      renderizarPoster();
+      document.getElementById('firebaseStatus').innerText = "🟢 Sincronizado";
+      document.getElementById('firebaseStatus').style.color = "var(--accent)";
+    }, (error) => {
+      console.error("Error Realtime DB: ", error);
+      document.getElementById('firebaseStatus').innerText = "🔴 Sin conexión";
+      document.getElementById('firebaseStatus').style.color = "#dc2626";
+    });
+  }
+
+  window.renderizarPoster = function() {
+    const container = document.getElementById('posterContainer');
+    container.innerHTML = '';
+
+    const querySearch = document.getElementById('searchInput').value.toLowerCase();
+    const queryDept = document.getElementById('filterDept').value;
+    const queryQuarter = document.getElementById('filterQuarter').value;
+
+    let totalEvCount = Object.keys(eventosDataMap).length;
+    ultimosEventosFiltrados = [];
+
+    let mesesAFiltrar = MESES;
+    if (queryQuarter && TRIMESTRES[queryQuarter]) {
+      mesesAFiltrar = TRIMESTRES[queryQuarter];
+    }
+
+    mesesAFiltrar.forEach(mes => {
+      let eventosMesKeys = Object.keys(eventosDataMap).filter(k => eventosDataMap[k].mes === mes);
+
+      eventosMesKeys = eventosMesKeys.filter(k => {
+        const ev = eventosDataMap[k];
+        const matchSearch = ev.actividad.toLowerCase().includes(querySearch) || (ev.descripcion || '').toLowerCase().includes(querySearch);
+        const matchDept = !queryDept || (ev.departamentos && ev.departamentos.includes(queryDept));
+        return matchSearch && matchDept;
+      });
+
+      eventosMesKeys.forEach(k => ultimosEventosFiltrados.push(eventosDataMap[k]));
+
+      if ((queryDept || queryQuarter || querySearch) && eventosMesKeys.length === 0) {
+        return; 
+      }
+
+      const monthBox = document.createElement('div');
+      monthBox.className = 'month-card';
+
+      let htmlEvents = '';
+      if (eventosMesKeys.length === 0) {
+        htmlEvents = `<div style="padding:15px; font-size:0.75rem; color:var(--text-muted); text-align:center;">Sin eventos en este mes</div>`;
+      } else {
+        eventosMesKeys.forEach(key => {
+          const ev = eventosDataMap[key];
+          let lugarTxt = Array.isArray(ev.lugares) ? ev.lugares.join(', ') : (ev.lugar || 'Iglesia local');
+          let deptsChipsHtml = (ev.departamentos || []).map(d => `<span class="mini-dept-chip">${d}</span>`).join('');
+
+          htmlEvents += `
+            <div class="event-item" onclick="verDetalleEvento('${key}')">
+              <div class="date-split-box">
+                <div class="d-top">${ev.diaNombre}</div>
+                <div class="d-bottom">${ev.diaNum}</div>
+              </div>
+
+              <div class="event-info">
+                <div class="event-title">${ev.actividad}</div>
+                ${ev.descripcion ? `<div class="event-desc-text">${ev.descripcion}</div>` : ''}
+                <div class="event-location">📍 ${lugarTxt}</div>
+              </div>
+
+              <div class="event-depts-col">
+                ${deptsChipsHtml}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      monthBox.innerHTML = `<div class="month-header">${mes}</div><div>${htmlEvents}</div>`;
+      container.appendChild(monthBox);
+    });
+
+    if (container.children.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">No se encontraron eventos para los filtros seleccionados.</div>`;
+    }
+
+    actualizarEstadisticas(totalEvCount, ultimosEventosFiltrados.length, queryDept, queryQuarter);
+  };
+
+  function actualizarEstadisticas(total, filtrados, dept, quarter) {
+    document.getElementById('statTotalEv').innerText = total;
+    document.getElementById('statFilteredEv').innerText = filtrados;
+
+    let contexto = "Todos los Departamentos";
+    if (dept && quarter) contexto = `${dept} (${quarter})`;
+    else if (dept) contexto = dept;
+    else if (quarter) contexto = `Trimestre ${quarter}`;
+    document.getElementById('statFilterContext').innerText = contexto;
+
+    if (ultimosEventosFiltrados.length > 0) {
+      const prox = ultimosEventosFiltrados[0];
+      document.getElementById('statNextEvTitle').innerText = prox.actividad;
+      document.getElementById('statNextEvSub').innerText = `${prox.diaNombre} ${prox.diaNum} (${prox.mes})`;
+    } else {
+      document.getElementById('statNextEvTitle').innerText = "Sin actividades";
+      document.getElementById('statNextEvSub').innerText = "Ajuste los filtros";
+    }
+  }
+
+  window.filtrarEventos = function() { renderizarPoster(); };
+
+  window.exportarReportePDF = function() {
+    const queryDept = document.getElementById('filterDept').value || "Todos los Departamentos";
+    const queryQuarter = document.getElementById('filterQuarter').options[document.getElementById('filterQuarter').selectedIndex].text;
+    const printArea = document.getElementById('printReportArea');
+
+    const fechaHoy = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    let filasTabla = '';
+    if (ultimosEventosFiltrados.length === 0) {
+      filasTabla = `<tr><td colspan="5" style="text-align:center; padding:20px;">No hay eventos registrados para este filtro.</td></tr>`;
+    } else {
+      ultimosEventosFiltrados.forEach(ev => {
+        let lugarTxt = Array.isArray(ev.lugares) ? ev.lugares.join(', ') : (ev.lugar || 'Iglesia local');
+        filasTabla += `
+          <tr>
+            <td style="font-weight:bold; color:#0f766e;">${ev.mes}</td>
+            <td class="pdf-date-badge">${ev.diaNombre}<br>${ev.diaNum}</td>
+            <td style="font-weight:bold;">${ev.actividad}</td>
+            <td>${ev.descripcion || 'Sin descripción adicional'}</td>
+            <td>📍 ${lugarTxt}</td>
+          </tr>
+        `;
+      });
+    }
+
+    printArea.innerHTML = `
+      <div class="pdf-header">
+        <h1>ASOCIACIÓN DE OAXACA</h1>
+        <h2>Calendario Oficial de Actividades 2027</h2>
+      </div>
+      <div class="pdf-meta">
+        <div><strong>Departamento:</strong> ${queryDept}</div>
+        <div><strong>Periodo:</strong> ${queryQuarter}</div>
+        <div><strong>Fecha Emisión:</strong> ${fechaHoy}</div>
+      </div>
+      <table class="pdf-table">
+        <thead>
+          <tr>
+            <th style="width:12%;">Mes</th>
+            <th style="width:15%;">Fecha</th>
+            <th style="width:28%;">Actividad</th>
+            <th style="width:30%;">Descripción / Detalles</th>
+            <th style="width:15%;">Lugar</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filasTabla}
+        </tbody>
+      </table>
+      <div class="pdf-footer">
+        Creado por Asociación de Oaxaca - Documento de Consulta 2027
+      </div>
+    `;
+
+    window.print();
+  };
+
+  // GENERAR ENLACE DE GOOGLE CALENDAR
+  function obtenerLinkGoogleCalendar(ev, lugarTxt) {
+    const mesNum = MESES_NUM[ev.mes] || "01";
+    // Extraer primer número del día para fecha inicio
+    const matchDia = (ev.diaNum || "01").match(/\d+/);
+    let diaClean = matchDia ? matchDia[0] : "01";
+    if (diaClean.length === 1) diaClean = "0" + diaClean;
+
+    const fechaInicioStr = `2027${mesNum}${diaClean}T090000Z`;
+    const fechaFinStr = `2027${mesNum}${diaClean}T180000Z`;
+
+    const titulo = encodeURIComponent(`${ev.actividad} - AO 2027`);
+    const detalles = encodeURIComponent(`📌 Actividad: ${ev.actividad}\n${ev.descripcion ? `📝 Detalle: ${ev.descripcion}\n` : ''}🏢 Departamentos: ${(ev.departamentos || []).join(', ')}\n📍 Asociación de Oaxaca`);
+    const ubicacion = encodeURIComponent(lugarTxt);
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${fechaInicioStr}/${fechaFinStr}&details=${detalles}&location=${ubicacion}`;
+  }
+
+  // DESCARGAR ARCHIVO .ICS PARA ICLOUD / APPLE CALENDAR / OUTLOOK
+  window.descargarIcsCalendar = function(key) {
+    const ev = eventosDataMap[key];
+    if (!ev) return;
+
+    let lugarTxt = Array.isArray(ev.lugares) ? ev.lugares.join(', ') : (ev.lugar || 'Iglesia local');
+    const mesNum = MESES_NUM[ev.mes] || "01";
+    const matchDia = (ev.diaNum || "01").match(/\d+/);
+    let diaClean = matchDia ? matchDia[0] : "01";
+    if (diaClean.length === 1) diaClean = "0" + diaClean;
+
+    const fechaStr = `2027${mesNum}${diaClean}`;
+
+    const contentIcs = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Asociacion de Oaxaca//Calendario 2027//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+SUMMARY:${ev.actividad} (Asociación de Oaxaca)
+DESCRIPTION:${(ev.descripcion || 'Sin descripción').replace(/\n/g, ' ')} | Deptos: ${(ev.departamentos || []).join(', ')}
+LOCATION:${lugarTxt}
+DTSTART;VALUE=DATE:${fechaStr}
+DTEND;VALUE=DATE:${fechaStr}
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([contentIcs], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', `evento_${ev.actividad.replace(/\s+/g, '_')}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  window.verDetalleEvento = function(key) {
+    const ev = eventosDataMap[key];
+    if (!ev) return;
+
+    const imgPortada = convertirUrlDrive(ev.imagenes?.portada);
+    const imgPoster = convertirUrlDrive(ev.imagenes?.poster);
+    const imgPerfil = convertirUrlDrive(ev.imagenes?.perfil);
+
+    let lugarTxt = Array.isArray(ev.lugares) ? ev.lugares.join(', ') : (ev.lugar || 'Iglesia local');
+
+    const msgWhatsApp = encodeURIComponent(`🗓️ *CALENDARIO 2027 AO*\n\n📌 *Actividad:* ${ev.actividad}\n${ev.descripcion ? `📝 *Detalle:* ${ev.descripcion}\n` : ''}📅 *Fecha:* ${ev.diaNombre} ${ev.diaNum} (${ev.mes})\n📍 *Lugar:* ${lugarTxt}\n🏢 *Deptos:* ${(ev.departamentos || []).join(', ')}\n${ev.mapaUrl ? `\n📍 Ubicación Google Maps: ${ev.mapaUrl}` : ''}`);
+    const linkWhatsApp = `https://api.whatsapp.com/send?text=${msgWhatsApp}`;
+    const linkGoogleCalendar = obtenerLinkGoogleCalendar(ev, lugarTxt);
+
+    const content = document.getElementById('detailContent');
+    content.innerHTML = `
+      <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+        <div class="date-split-box" style="width:70px; height:60px;">
+          <div class="d-top" style="font-size:0.7rem;">${ev.diaNombre}</div>
+          <div class="d-bottom" style="font-size:1.1rem;">${ev.diaNum}</div>
+        </div>
+        <div>
+          <span style="font-size:0.75rem; background:var(--border-color); color:var(--text-muted); padding:2px 8px; border-radius:4px; font-weight:bold;">${ev.mes}</span>
+          <h2 style="color:var(--text); margin-top:4px;">${ev.actividad}</h2>
+          ${ev.descripcion ? `<p style="color:var(--text-muted); font-style:italic; font-size:0.85rem; margin-top:2px;">"${ev.descripcion}"</p>` : ''}
+        </div>
+      </div>
+
+      <p style="margin-bottom:6px; color:var(--text-muted);"><strong>📍 Lugar:</strong> ${lugarTxt}</p>
+      <p style="margin-bottom:15px; color:var(--text-muted);"><strong>🏢 Departamentos:</strong> ${(ev.departamentos || []).join(', ')}</p>
+
+      <!-- BOTONES DE AGREGAR AL CALENDARIO -->
+      <div class="add-calendar-box">
+        <div class="add-calendar-title">📅 AGREGAR ESTA ACTIVIDAD A MI CALENDARIO:</div>
+        <div class="calendar-btns-grid">
+          <a href="${linkGoogleCalendar}" target="_blank" class="btn btn-gcal">📅 Google Calendar</a>
+          <button class="btn btn-ical" onclick="descargarIcsCalendar('${key}')">🍏 Apple / iCloud Calendar (.ics)</button>
+        </div>
+      </div>
+
+      <!-- GALERÍA DE IMÁGENES -->
+      <div class="gallery-grid">
+        <div class="gallery-box">
+          <div class="gallery-label">📷 Portada (Horizontal)</div>
+          ${imgPortada 
+            ? `<img src="${imgPortada}" class="img-preview-banner" onclick="abrirLightbox('${imgPortada}', 'Portada Horizontal')">`
+            : `<div style="font-size:0.7rem; color:var(--text-muted); padding:20px 0;">Sin portada</div>`}
+        </div>
+
+        <div class="gallery-box">
+          <div class="gallery-label">📜 Póster Oficial (Vertical)</div>
+          ${imgPoster 
+            ? `<img src="${imgPoster}" class="img-preview-poster" onclick="abrirLightbox('${imgPoster}', 'Póster Oficial Vertical')">`
+            : `<div style="font-size:0.7rem; color:var(--text-muted); padding:20px 0;">Sin póster</div>`}
+        </div>
+
+        <div class="gallery-box">
+          <div class="gallery-label">👤 Foto Perfil / Badge (Cuadrado)</div>
+          ${imgPerfil 
+            ? `<img src="${imgPerfil}" class="img-preview-profile" onclick="abrirLightbox('${imgPerfil}', 'Foto Perfil / Badge')">`
+            : `<div style="font-size:0.7rem; color:var(--text-muted); padding:20px 0;">Sin imagen perfil</div>`}
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+        <a href="${linkWhatsApp}" target="_blank" class="btn btn-whatsapp">🟢 Compartir por WhatsApp</a>
+        ${ev.mapaUrl ? `<a href="${ev.mapaUrl}" target="_blank" class="btn btn-accent">📍 Ubicación Google Maps</a>` : ''}
+        ${ev.archivoEnlace ? `<a href="${ev.archivoEnlace}" target="_blank" class="btn btn-secondary">📄 Descargar Materiales</a>` : ''}
+      </div>
+    `;
+
+    document.getElementById('modalDetail').classList.add('active');
+  };
+
+  window.abrirLightbox = function(url, titulo) {
+    activeImageTargetUrl = url;
+    document.getElementById('lightboxTitle').innerText = titulo;
+    document.getElementById('lightboxImg').src = url;
+    document.getElementById('btnDownloadImg').href = url;
+    document.getElementById('modalLightbox').classList.add('active');
+  };
+
+  window.cerrarLightbox = function() {
+    document.getElementById('modalLightbox').classList.remove('active');
+  };
+
+  window.copiarEnlaceImagen = function() {
+    if (activeImageTargetUrl) {
+      navigator.clipboard.writeText(activeImageTargetUrl).then(() => {
+        alert("📋 ¡Enlace de la imagen copiado al portapapeles!");
+      });
+    }
+  };
+
+  window.cerrarModales = function() {
+    document.getElementById('modalDetail').classList.remove('active');
+    cerrarLightbox();
+  };
+</script>
+</body>
+</html>
